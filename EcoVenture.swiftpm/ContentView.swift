@@ -1,6 +1,5 @@
 import SwiftUI
 
-// Add this class before the ContentView struct
 class GameState: ObservableObject {
     @Published var highScore: Int = 0
     @Published var currentLevel: Int = 1
@@ -105,8 +104,7 @@ class GameState: ObservableObject {
     }
     
     func getCoinsCostForLevel(_ level: Int) -> Int {
-        // Base cost is 100 coins, increases by 50 coins per level
-        return 75 + ((level - 2) * 25)  // Level 2 costs 100, Level 3 costs 150, Level 4 costs 200, etc.
+        return 75 + ((level - 2) * 25)
     }
     
     func canUnlockLevel(level: Int) -> Bool {
@@ -121,8 +119,6 @@ class GameState: ObservableObject {
         }
     }
 }
-
-// Add this struct after the GameState class
 struct Fireball: Identifiable {
     let id = UUID()
     var position: CGFloat
@@ -139,9 +135,7 @@ struct ContentView: View {
     init() {
         // Customize the tab bar appearance
         let appearance = UITabBarAppearance()
-        appearance.backgroundColor = UIColor(red: 0.4, green: 0.7, blue: 1.0, alpha: 0.7)  // Light blue with transparency
-        
-        // Customize the normal and selected item colors
+        appearance.backgroundColor = UIColor(red: 0.4, green: 0.7, blue: 1.0, alpha: 0.7)
         appearance.stackedLayoutAppearance.normal.iconColor = .white.withAlphaComponent(0.6)
         appearance.stackedLayoutAppearance.selected.iconColor = .white
         
@@ -151,12 +145,6 @@ struct ContentView: View {
     
     var body: some View {
         TabView(selection: $selectedTab) {
-//            InfoView()
-//                .tabItem {
-//                    Label("Info", systemImage: "info.circle")
-//                }
-//                .tag(0)
-
             GameView(isPresented: $isPresented, gameState: gameState)
                 .tabItem {
                     Label("Game", systemImage: "gamecontroller")
@@ -175,25 +163,6 @@ struct ContentView: View {
         }
     }
 }
-
-//// MARK: - First View
-//struct InfoView: View {
-//    var body: some View {
-//        NavigationView {
-//            VStack {
-//                Text("About the Game")
-//                    .font(.largeTitle)
-//                    .fontWeight(.bold)
-//                    .padding()
-//                Text("This game helps raise awareness about keeping water bodies clean by collecting waste before it pollutes the water.")
-//                    .multilineTextAlignment(.center)
-//                    .padding()
-//            }
-//            .navigationTitle("Game🏏")
-//        }
-//    }
-//}
-
 // MARK: - Second View
 struct GameView: View {
     @Binding var isPresented: Bool
@@ -209,13 +178,8 @@ struct GameView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                // Pass the current theme to DynamicBackground
                 DynamicBackground(isForestTheme: gameState.isForestTheme(for: gameState.currentLevel))
-                
-                // Add clouds for consistency
                 CloudsView()
-                
-                // Add theme-specific background
                 VStack {
                     Spacer()
                     if gameState.isForestTheme(for: gameState.currentLevel) {
@@ -448,20 +412,18 @@ struct FullScreenView: View {
         return (targetScore, CGFloat(speed), spawnRate, powerLoss, Int(maxMissed), CGFloat(catchRadius))
     }
     
-    // Add this computed property to determine the theme
+    // Add this property to determine the theme
     var shouldShowForestTheme: Bool {
         let levelGroup = (gameState.currentLevel - 1) / 2  // Group levels in pairs
         return levelGroup % 2 == 1  // Alternate between themes every 2 levels
     }
-    
-    // Add this computed property
+
     private var shouldUseFireballs: Bool {
         gameState.isForestTheme(for: gameState.currentLevel)
     }
     
-    // Add a computed property for power loss per miss
     private var powerLossPerMiss: Int {
-        return 100 / levelConfig.maxMissed  // Distribute power loss evenly across max misses
+        return 100 / levelConfig.maxMissed
     }
     
     var body: some View {
@@ -476,8 +438,6 @@ struct FullScreenView: View {
                 }
             
             CloudsView()
-            
-            // Use shouldShowForestTheme instead of isForestTheme
             if shouldShowForestTheme {
                 // Forest theme
                 ForestView()
@@ -512,8 +472,6 @@ struct FullScreenView: View {
                     }
                 }
             }
-            
-            // Add fireballs or waste based on theme
             if shouldUseFireballs {
                 ForEach(fireballs) { fireball in
                     FireballView(fireball: fireball)
@@ -545,13 +503,10 @@ struct FullScreenView: View {
                     .gesture(
                         DragGesture()
                             .onChanged { value in
-                                // Update X position with bounds checking
                                 self.boatPosition = min(max(value.location.x, 30), UIScreen.main.bounds.width - 30)
                                 
-                                // Update Y position with bounds checking
-                                // Limit vertical movement between top and bottom of screen
-                                let minY = UIScreen.main.bounds.height * 0.2 // Top 20% of screen
-                                let maxY = UIScreen.main.bounds.height - 50  // Bottom of screen with padding
+                                let minY = UIScreen.main.bounds.height * 0.2
+                                let maxY = UIScreen.main.bounds.height - 50
                                 self.carpetPositionY = min(max(value.location.y, minY), maxY)
                             }
                     )
@@ -564,9 +519,7 @@ struct FullScreenView: View {
             }
 
             VStack {
-                // Game stats
                 HStack(spacing: 5) {
-                    // Exit button with new styling
                     Button(action: { isPresented.toggle() }) {
                         VStack(spacing: 5) {
                             Image(systemName: "xmark.circle.fill")
@@ -611,10 +564,8 @@ struct FullScreenView: View {
                     )
                 }
                 .padding(.top, 0)
-                
                 Spacer()
             }
-
             if isGameOver {
                 VStack {
                     Text("Game Over!")
@@ -660,7 +611,6 @@ struct FullScreenView: View {
                         }
                         .padding(.bottom, 5)
                     }
-                    
                     Button(action: resetGame) {
                         Text("Play Again")
                             .fontWeight(.bold)
@@ -707,16 +657,15 @@ struct FullScreenView: View {
                 // Spawn fireball from airplane
                 let fireball = Fireball(
                     position: airplanePosition,
-                    positionY: 100,  // Adjust this value based on airplane position
+                    positionY: 100,
                     rotation: Double.random(in: 0...360)
                 )
                 fireballs.append(fireball)
             } else {
-                // Updated waste spawning logic for river theme - spawn from airplane
                 let randomSymbol = trashSymbols.randomElement()!
                 let waste = Waste(
-                    position: airplanePosition,  // Changed to spawn from airplane position
-                    positionY: 100,  // Changed to match airplane height
+                    position: airplanePosition,
+                    positionY: 100,
                     rotation: Double.random(in: 0...360),
                     symbol: randomSymbol.symbol,
                     color: randomSymbol.color
@@ -724,14 +673,10 @@ struct FullScreenView: View {
                 self.waste.append(waste)
             }
         }
-
-        // Update positions and check collisions
         if shouldUseFireballs {
             fireballs = fireballs.compactMap { fireball in
                 var updatedFireball = fireball
                 updatedFireball.positionY += levelConfig.wasteSpeed
-                
-                // Check collision with flying carpet using actual carpet position
                 if abs(updatedFireball.positionY - carpetPositionY) < 30 &&
                    abs(updatedFireball.position - boatPosition) < levelConfig.catchRadius {
                     score += 1
@@ -742,28 +687,21 @@ struct FullScreenView: View {
                     }
                     return nil
                 }
-                
-                // Remove if passed bottom of screen
                 if updatedFireball.positionY > UIScreen.main.bounds.height {
                     missedWaste += 1
-                    // Update power based on misses
                     power = max(0, 100 - (missedWaste * powerLossPerMiss))
                     if missedWaste >= levelConfig.maxMissed {
-                        power = 0  // Ensure power is zero when max misses reached
+                        power = 0
                         isGameOver = true
                     }
                     return nil
                 }
-                
                 return updatedFireball
             }
         } else {
-            // Updated waste update logic for river theme
             waste = waste.compactMap { wasteItem in
                 var updatedWaste = wasteItem
                 updatedWaste.positionY += levelConfig.wasteSpeed
-                
-                // Check collision with boat
                 let boatY = UIScreen.main.bounds.height - 131
                 if abs(updatedWaste.positionY - boatY) < 40 &&
                    abs(updatedWaste.position - boatPosition) < levelConfig.catchRadius + 20 {
@@ -775,14 +713,11 @@ struct FullScreenView: View {
                     }
                     return nil
                 }
-                
-                // Remove if passed bottom of screen
                 if updatedWaste.positionY > UIScreen.main.bounds.height {
                     missedWaste += 1
-                    // Update power based on misses
                     power = max(0, 100 - (missedWaste * powerLossPerMiss))
                     if missedWaste >= levelConfig.maxMissed {
-                        power = 0  // Ensure power is zero when max misses reached
+                        power = 0
                         isGameOver = true
                     }
                     return nil
@@ -791,7 +726,6 @@ struct FullScreenView: View {
                 return updatedWaste
             }
         }
-
         if isGameOver || isGameWon {
             gameState.updateHighScore(score)
             gameTimer?.invalidate()
@@ -804,7 +738,7 @@ struct FullScreenView: View {
         waste = []
         fireballs = []
         score = 0
-        power = 100  // Reset power to 100%
+        power = 100
         missedWaste = 0
         isGameOver = false
         isGameWon = false
@@ -813,7 +747,6 @@ struct FullScreenView: View {
         startGame()
     }
 
-    // Add this function to create random bird positions
     private func createBirds() {
         birdPositions = (0...5).map { _ in
             (
@@ -822,14 +755,11 @@ struct FullScreenView: View {
             )
         }
     }
-
-    // Add FireballView
     struct FireballView: View {
         let fireball: Fireball
         
         var body: some View {
             ZStack {
-                // Fireball appearance
                 Circle()
                     .fill(LinearGradient(
                         gradient: Gradient(colors: [.orange, .red]),
@@ -900,15 +830,13 @@ struct AirplaneView: View {
     var body: some View {
         Image(systemName: "airplane")
             .resizable()
-            .frame(width: 60, height: 60)  // Made airplane bigger
+            .frame(width: 60, height: 60)
             .foregroundColor(.gray)
             .rotationEffect(.degrees(direction == 1 ? 0 : 180))
-            .position(x: position, y: 100)  // Moved airplane higher
+            .position(x: position, y: 100)
             .shadow(color: .black.opacity(0.3), radius: 3, x: 0, y: 2)
     }
 }
-
-// Updated WaveView for more pronounced waves
 struct WaveView: View {
     var waveOffset1: CGFloat
     var waveOffset2: CGFloat
@@ -916,7 +844,6 @@ struct WaveView: View {
     
     var body: some View {
         ZStack {
-            // Multiple wave layers with more pronounced amplitudes
             WaveShape(offset: waveOffset1, amplitude: 8, frequency: 0.3)
                 .fill(Color.blue.opacity(0.4))
             
@@ -928,8 +855,6 @@ struct WaveView: View {
         }
     }
 }
-
-// Updated WaveShape for smoother waves
 struct WaveShape: Shape {
     var offset: CGFloat
     var amplitude: CGFloat
@@ -939,8 +864,6 @@ struct WaveShape: Shape {
         var path = Path()
         
         path.move(to: CGPoint(x: 0, y: rect.maxY))
-        
-        // Use smaller stride for smoother waves
         for x in stride(from: 0, through: rect.width, by: 0.5) {
             let relativeX = x/rect.width
             let normalizedX = relativeX * .pi * 2 * frequency
@@ -954,19 +877,14 @@ struct WaveShape: Shape {
         return path
     }
 }
-
-// Add these new views for sun and birds
 struct SunView: View {
     var rotation: Double
     
     var body: some View {
         ZStack {
-            // Sun core
             Circle()
                 .fill(Color.yellow)
                 .frame(width: 45, height: 45)
-            
-            // Sun rays
             ForEach(0..<12) { i in
                 Rectangle()
                     .fill(Color.yellow)
@@ -986,14 +904,11 @@ struct BirdView: View {
     
     var body: some View {
         Path { path in
-            // Left wing
             path.move(to: CGPoint(x: 0, y: 0))
             path.addQuadCurve(
                 to: CGPoint(x: 10, y: 0),
                 control: CGPoint(x: 5, y: flapWings ? -5 : 5)
             )
-            
-            // Right wing
             path.move(to: CGPoint(x: 10, y: 0))
             path.addQuadCurve(
                 to: CGPoint(x: 20, y: 0),
@@ -1009,8 +924,6 @@ struct BirdView: View {
         }
     }
 }
-
-// Update the DynamicBackground with more nature-inspired colors
 struct DynamicBackground: View {
     @Environment(\.colorScheme) var colorScheme
     let isForestTheme: Bool
@@ -1033,19 +946,16 @@ struct DynamicBackground: View {
     
     var body: some View {
         ZStack {
-            // Base gradient with higher opacity for forest theme
             LinearGradient(
                 colors: gradientColors,
                 startPoint: .top,
                 endPoint: .bottom
             )
-            .opacity(isForestTheme ? 0.9 : 0.7)  // Higher opacity for forest theme
+            .opacity(isForestTheme ? 0.9 : 0.7)
         }
         .edgesIgnoringSafeArea(.all)
     }
 }
-
-// Add a floating leaf animation
 struct FloatingLeaf: View {
     @State private var position: CGPoint
     @State private var rotation: Double = 0
@@ -1072,8 +982,6 @@ struct FloatingLeaf: View {
             }
     }
 }
-
-// Add subtle water ripples
 struct WaterRipples: View {
     @State private var scale: CGFloat = 1.0
     @State private var opacity: Double = 0.3
@@ -1108,18 +1016,15 @@ struct CloudsView: View {
     
     var body: some View {
         ZStack {
-            // Cloud 1 - increased y offset from 120 to 50
             CloudShape()
                 .fill(Color.white.opacity(0.8))
                 .frame(width: 120, height: 60)
-                .offset(x: cloudOffset1, y: 50)  // Changed from y: 120 to y: 50
+                .offset(x: cloudOffset1, y: 50)
                 .onAppear {
                     withAnimation(.linear(duration: 30).repeatForever(autoreverses: false)) {
                         cloudOffset1 = UIScreen.main.bounds.width + 200
                     }
                 }
-            
-            // Cloud 2 - increased y offset from 180 to 90
             CloudShape()
                 .fill(Color.white.opacity(0.6))
                 .frame(width: 100, height: 50)
@@ -1347,7 +1252,6 @@ struct EmptyActivityView: View {
     }
 }
 
-// Add this new view for bonus alert
 struct BonusAlertView: View {
     var body: some View {
         VStack {
@@ -1478,7 +1382,7 @@ struct AddActivitySheet: View {
                 // Coin reward animation overlay
                 if showCoinReward {
                     VStack {
-                        Image(systemName: "coins.fill")
+                        Image(systemName: "dollarsign.circle.fill")
                             .font(.system(size: 60))
                             .foregroundColor(.yellow)
                         Text("+\(gameState.coinsPerActivity)")
@@ -1573,7 +1477,6 @@ struct ImagePicker: UIViewControllerRepresentable {
     }
 }
 
-// Add this struct to store nature activities
 struct NatureActivity: Identifiable, Codable {
     let id: UUID
     let date: Date
@@ -1585,8 +1488,6 @@ struct NatureActivity: Identifiable, Codable {
         self.entries = entries
     }
 }
-
-// New struct to store individual activity entries
 struct ActivityEntry: Identifiable, Codable {
     let id: UUID
     let imageData: Data
@@ -1601,7 +1502,6 @@ struct ActivityEntry: Identifiable, Codable {
     }
 }
 
-// Add this new view for the forest background
 struct ForestView: View {
     var body: some View {
         VStack {
@@ -1622,14 +1522,12 @@ struct ForestView: View {
     }
 }
 
-// Add this new view for the flying carpet
 struct FlyingCarpetView: View {
     @Binding var position: CGFloat
     @Binding var positionY: CGFloat
     
     var body: some View {
         ZStack {
-            // Carpet base with floating animation
             Rectangle()
                 .frame(width: 60, height: 20)
                 .foregroundColor(Color.purple.opacity(0.8))
@@ -1649,8 +1547,6 @@ struct FlyingCarpetView: View {
                         }
                     }
                 )
-            
-            // Character on carpet
             Image(systemName: "person.fill")
                 .resizable()
                 .frame(width: 20, height: 20)
@@ -1661,8 +1557,6 @@ struct FlyingCarpetView: View {
         .shadow(color: .black.opacity(0.3), radius: 5, x: 0, y: 2)
     }
 }
-
-// Add these new views for different level appearances
 struct LockedLevelView: View {
     let level: Int
     
@@ -1697,7 +1591,7 @@ struct LockedLevelView: View {
                 .font(.subheadline)
                 .foregroundColor(.white.opacity(0.7))
             
-            Image(systemName: "coins.fill")
+            Image(systemName: "dollarsign.circle.fill")
                 .font(.system(size: 24))
                 .foregroundColor(.yellow)
                 .padding(8)
@@ -1735,7 +1629,6 @@ struct FirstLevelView: View {
     
     var body: some View {
         VStack(spacing: 12) {
-            // Level number with glowing effect
             ZStack {
                 Circle()
                     .fill(
@@ -1759,8 +1652,6 @@ struct FirstLevelView: View {
                     .foregroundColor(.white)
                     .shadow(color: .black.opacity(0.3), radius: 2)
             }
-            
-            // Level description with improved styling
             Text(description)
                 .font(.system(size: 16, weight: .medium))
                 .multilineTextAlignment(.center)
@@ -1929,17 +1820,14 @@ struct RiverLevelView: View {
         .shadow(color: .black.opacity(0.3), radius: 8, x: 0, y: 4)
     }
 }
-
-// Update CoinView with a more attractive design
 struct CoinView: View {
     let coins: Int
     @State private var rotationAngle: Double = 0
     
     var body: some View {
         HStack(spacing: 8) {
-            // Coin stack icon
             ZStack {
-                Image(systemName: "circle.fill")
+                Image(systemName: "dollarsign.circle.fill")
                     .foregroundColor(.yellow)
                     .font(.system(size: 28))
                     .shadow(color: .black.opacity(0.3), radius: 2)
@@ -1949,13 +1837,7 @@ struct CoinView: View {
                             rotationAngle = 360
                         }
                     }
-                
-                Image(systemName: "dollarsign")
-                    .foregroundColor(.orange)
-                    .font(.system(size: 16, weight: .bold))
             }
-            
-            // Coin amount with background
             Text("\(coins)")
                 .font(.system(size: 22, weight: .bold))
                 .foregroundColor(.white)
@@ -1967,7 +1849,6 @@ struct CoinView: View {
         .padding(.vertical, 8)
         .background(
             ZStack {
-                // Gradient background
                 LinearGradient(
                     gradient: Gradient(colors: [
                         Color(red: 0.2, green: 0.2, blue: 0.2),
@@ -1976,8 +1857,6 @@ struct CoinView: View {
                     startPoint: .top,
                     endPoint: .bottom
                 )
-                
-                // Subtle shine effect
                 LinearGradient(
                     gradient: Gradient(colors: [
                         Color.white.opacity(0.2),
@@ -2005,7 +1884,6 @@ struct CoinView: View {
     }
 }
 
-// Add a streak progress view
 struct StreakProgressView: View {
     let currentStreak: Int
     
@@ -2039,8 +1917,6 @@ struct StreakProgressView: View {
         .cornerRadius(10)
     }
 }
-
-// Add this new custom view for locked level popup
 struct LockLevelPopup: View {
     @Binding var isPresented: Bool
     let level: Int
@@ -2059,10 +1935,7 @@ struct LockLevelPopup: View {
                         isPresented = false
                     }
                 }
-            
-            // Popup content
             VStack(spacing: 20) {
-                // Top decoration with lock icon
                 ZStack {
                     Circle()
                         .fill(
@@ -2097,7 +1970,7 @@ struct LockLevelPopup: View {
                             .font(.subheadline)
                             .foregroundColor(.white.opacity(0.8))
                         HStack(spacing: 5) {
-                            Image(systemName: "coins.fill")
+                            Image(systemName: "dollarsign.circle.fill")
                                 .foregroundColor(.yellow)
                             Text("\(currentCoins)")
                                 .font(.title2.bold())
@@ -2114,7 +1987,7 @@ struct LockLevelPopup: View {
                             .font(.subheadline)
                             .foregroundColor(.white.opacity(0.8))
                         HStack(spacing: 5) {
-                            Image(systemName: "coins.fill")
+                            Image(systemName: "dollarsign.circle.fill")
                                 .foregroundColor(.yellow)
                             Text("\(requiredCoins)")
                                 .font(.title2.bold())
@@ -2125,8 +1998,6 @@ struct LockLevelPopup: View {
                     .background(Color.white.opacity(0.1))
                     .cornerRadius(12)
                 }
-                
-                // Action buttons
                 VStack(spacing: 12) {
                     Button(action: {
                         if currentCoins >= requiredCoins {
